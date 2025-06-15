@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Fix ownership of the workspace to match the claude user
+chown -R claude:claude /workspace
+
+# Copy CLAUDE.md from config mount if it exists
+if [ -f "/claude-config/CLAUDE.md" ]; then
+    echo "Copying CLAUDE.md from config directory..."
+    cp /claude-config/CLAUDE.md /workspace/CLAUDE.md
+    chown claude:claude /workspace/CLAUDE.md
+    echo "CLAUDE.md copied to workspace"
+fi
+
+# Switch to claude user and execute the command
+exec gosu claude "$@"
