@@ -69,11 +69,27 @@ The CLAUDE.md file will be automatically copied to your project workspace inside
 - **Essential Tools**: git, python3, build tools for most development workflows  
 - **gosu**: Standard container pattern for user switching without security risks
 
+## Shell Aliases (Recommended)
+
+For even easier usage, add shell aliases to your profile:
+
+```bash
+# Add to ~/.zshrc or ~/.bashrc
+source ~/ai-sandbox/claude-aliases.sh
+```
+
+Then use these convenient commands:
+- `claude-here` - Run Claude on current directory
+- `claude-with-config` - Run Claude with config for current directory name
+- `claude-init [name]` - Initialize CLAUDE.md config for project
+- `claude-run [path] [name]` - Run Claude with specific project and config
+
 ## Files
 
 - `Dockerfile`: Container definition with Claude Code and tools
 - `entrypoint.sh`: Handles file ownership and user switching
 - `run-claude.sh`: Wrapper script for easy usage
+- `claude-aliases.sh`: Shell aliases and helper functions
 - `README.md`: This documentation
 
 ## Manual Usage
