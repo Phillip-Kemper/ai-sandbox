@@ -12,4 +12,10 @@ if [ -f "/claude-config/CLAUDE.md" ]; then
 fi
 
 # Switch to claude user and execute the command
-exec gosu claude "$@"
+# If no command specified, default to claude --dangerously-skip-permissions
+if [ $# -eq 0 ]; then
+    echo "Starting Claude Code with --dangerously-skip-permissions..."
+    exec gosu claude claude --dangerously-skip-permissions
+else
+    exec gosu claude "$@"
+fi
