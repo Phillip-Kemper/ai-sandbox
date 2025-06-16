@@ -27,7 +27,10 @@ fi
 # Build the Docker image from the script's directory
 echo "Building Claude Code Docker image..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-docker build -t claude-code "$SCRIPT_DIR"
+docker build -t claude-code \
+  --build-arg INSTALL_FOUNDRY=${INSTALL_FOUNDRY:-false} \
+  --build-arg INSTALL_NATS=${INSTALL_NATS:-false} \
+  "$SCRIPT_DIR"
 
 # Prepare docker run command
 DOCKER_CMD="docker run -it --name claude-session --rm"

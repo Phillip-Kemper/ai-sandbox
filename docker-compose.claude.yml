@@ -2,7 +2,11 @@ version: '3.8'
 
 services:
   claude-code:
-    build: .
+    build: 
+      context: .
+      args:
+        - INSTALL_FOUNDRY=${INSTALL_FOUNDRY:-false}
+        - INSTALL_NATS=${INSTALL_NATS:-false}
     container_name: claude-session
     volumes:
       - ${PROJECT_PATH:-./}:/workspace

@@ -94,7 +94,10 @@ mkdir -p "$CLAUDE_CONFIG_PATH"
 # Build Claude image if needed
 echo "🔨 Building Claude Code image..."
 cd "$SCRIPT_DIR"
-docker build -t claude-code .
+docker build -t claude-code \
+  --build-arg INSTALL_FOUNDRY=${INSTALL_FOUNDRY:-false} \
+  --build-arg INSTALL_NATS=${INSTALL_NATS:-false} \
+  .
 
 # Start Claude Code with compose
 cd "$PROJECT_PATH"
