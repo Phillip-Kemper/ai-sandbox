@@ -38,6 +38,16 @@ DOCKER_CMD="$DOCKER_CMD -e ANTHROPIC_API_KEY=\"$ANTHROPIC_API_KEY\""
 mkdir -p "$HOME/.claude-docker-config"
 DOCKER_CMD="$DOCKER_CMD -v \"$HOME/.claude-docker-config:/home/claude\""
 
+# Mount host git config for seamless git operations
+if [ -f "$HOME/.gitconfig" ]; then
+    DOCKER_CMD="$DOCKER_CMD -v \"$HOME/.gitconfig:/home/claude/.gitconfig:ro\""
+fi
+
+# Mount GPG directory for commit signing
+if [ -d "$HOME/.gnupg" ]; then
+    DOCKER_CMD="$DOCKER_CMD -v \"$HOME/.gnupg:/home/claude/.gnupg:ro\""
+fi
+
 # Add CLAUDE.md config mount if provided
 if [ -n "$CLAUDE_CONFIG_PATH" ]; then
     if [ ! -d "$CLAUDE_CONFIG_PATH" ]; then
