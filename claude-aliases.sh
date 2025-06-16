@@ -18,10 +18,24 @@ fi
 # Basic aliases - using functions instead of aliases for proper expansion
 claude-here() {
     "$CLAUDE_DOCKER_DIR/run-claude.sh" "$(pwd)"
+    # Auto-setup GPG after container starts (wait longer for container to be ready)
+    sleep 5 && "$CLAUDE_DOCKER_DIR/setup-gpg.sh" 2>/dev/null &
 }
 
 claude-with-config() {
-    "$CLAUDE_DOCKER_DIR/run-claude.sh" "$(pwd)" "$HOME/.claude-configs/$(basename "$(pwd)")"
+    local project_name=$(basename "$(pwd)")
+    local config_dir="$HOME/.claude-configs/$project_name"
+    
+    # Create config directory if it doesn't exist
+    if [ ! -d "$config_dir" ]; then
+        echo "📁 Creating Claude config directory: $config_dir"
+        mkdir -p "$config_dir"
+        echo "💡 Run 'claude-init' to create a CLAUDE.md file for this project"
+    fi
+    
+    "$CLAUDE_DOCKER_DIR/run-claude.sh" "$(pwd)" "$config_dir"
+    # Auto-setup GPG after container starts (wait longer for container to be ready)
+    sleep 5 && "$CLAUDE_DOCKER_DIR/setup-gpg.sh" 2>/dev/null &
 }
 
 # Function to initialize Claude config for current project
@@ -110,6 +124,11 @@ claude-config-edit() {
         echo "❌ No config found for: $project_name"
         echo "💡 Create one with: claude-init $project_name"
     fi
+}
+
+# Function to securely import GPG key into running container
+claude-setup-gpg() {
+    "$CLAUDE_DOCKER_DIR/setup-gpg.sh" "$@"
 }
 
 # Quietly load aliases without spam

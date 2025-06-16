@@ -31,6 +31,7 @@ docker build -t claude-code "$SCRIPT_DIR"
 
 # Prepare docker run command
 DOCKER_CMD="docker run -it --name claude-session --rm"
+DOCKER_CMD="$DOCKER_CMD --network host"  # Access host services
 DOCKER_CMD="$DOCKER_CMD -v \"$PROJECT_PATH:/workspace\""
 DOCKER_CMD="$DOCKER_CMD -e ANTHROPIC_API_KEY=\"$ANTHROPIC_API_KEY\""
 
@@ -43,10 +44,8 @@ if [ -f "$HOME/.gitconfig" ]; then
     DOCKER_CMD="$DOCKER_CMD -v \"$HOME/.gitconfig:/home/claude/.gitconfig:ro\""
 fi
 
-# Mount GPG directory for commit signing
-if [ -d "$HOME/.gnupg" ]; then
-    DOCKER_CMD="$DOCKER_CMD -v \"$HOME/.gnupg:/home/claude/.gnupg:ro\""
-fi
+# Note: GPG keys are imported securely using setup-gpg.sh script
+# No need to mount the entire GPG directory for security reasons
 
 # Add CLAUDE.md config mount if provided
 if [ -n "$CLAUDE_CONFIG_PATH" ]; then

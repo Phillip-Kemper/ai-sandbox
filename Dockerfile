@@ -12,6 +12,10 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     gosu \
+    gnupg \
+    pinentry-curses \
+    docker.io \
+    docker-compose \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Claude Code globally

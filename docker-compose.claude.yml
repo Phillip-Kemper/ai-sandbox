@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  claude-code:
+    build: .
+    container_name: claude-session
+    volumes:
+      - ${PROJECT_PATH:-./}:/workspace
+      - ${CLAUDE_CONFIG_PATH:-./claude-config}:/claude-config
+      - ${HOME}/.claude-docker-config:/home/claude
+      - ${HOME}/.gitconfig:/home/claude/.gitconfig:ro
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    networks:
+      - default
+    # Keeps container running for you to attach
+    command: ["tail", "-f", "/dev/null"]
+
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_NAME:-claude}_default
+    external: true

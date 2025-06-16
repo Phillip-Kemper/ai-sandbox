@@ -1,0 +1,120 @@
+#!/bin/bash
+# Claude Code Docker Compose Integration
+# Runs Claude Code as part of your existing Docker Compose setup
+
+set -e
+
+show_usage() {
+    echo "Usage: $0 <project-path> [compose-file] [network-name]"
+    echo ""
+    echo "Integrates Claude Code with your Docker Compose setup"
+    echo ""
+    echo "Arguments:"
+    echo "  project-path    Path to your project with docker-compose.yml"
+    echo "  compose-file    Your compose file (default: docker-compose.yml)"
+    echo "  network-name    Docker network to join (default: auto-detect)"
+    echo ""
+    echo "Examples:"
+    echo "  $0 ~/my-api                                    # Basic usage"
+    echo "  $0 ~/my-api docker-compose.dev.yml            # Custom compose file"
+    echo "  $0 ~/my-api docker-compose.yml my-api_default # Custom network"
+    echo ""
+    echo "This will:"
+    echo "  - Connect Claude to your existing compose network"
+    echo "  - Allow Claude to access all your services by name"
+    echo "  - Share volumes and environment with your stack"
+}
+
+# Parse arguments
+PROJECT_PATH="$1"
+COMPOSE_FILE="${2:-docker-compose.yml}"
+NETWORK_NAME="$3"
+
+if [[ "$1" == "-h" || "$1" == "--help" || -z "$PROJECT_PATH" ]]; then
+    show_usage
+    exit 0
+fi
+
+# Validate project path
+if [ ! -d "$PROJECT_PATH" ]; then
+    echo "❌ Error: Directory $PROJECT_PATH does not exist"
+    exit 1
+fi
+
+# Check if compose file exists
+if [ ! -f "$PROJECT_PATH/$COMPOSE_FILE" ]; then
+    echo "❌ Error: $COMPOSE_FILE not found in $PROJECT_PATH"
+    echo "Available compose files:"
+    ls -1 "$PROJECT_PATH"/docker-compose*.yml 2>/dev/null || echo "None found"
+    exit 1
+fi
+
+# Check API key
+if [ -z "$ANTHROPIC_API_KEY" ]; then
+    echo "❌ Error: ANTHROPIC_API_KEY environment variable not set"
+    echo "Set it with: export ANTHROPIC_API_KEY=your_api_key"
+    exit 1
+fi
+
+# Auto-detect network if not provided
+if [ -z "$NETWORK_NAME" ]; then
+    cd "$PROJECT_PATH"
+    PROJECT_NAME=$(basename "$PROJECT_PATH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]//g')
+    NETWORK_NAME="${PROJECT_NAME}_default"
+    echo "🔍 Auto-detected network: $NETWORK_NAME"
+fi
+
+# Check if network exists
+if ! docker network ls | grep -q "$NETWORK_NAME"; then
+    echo "❌ Error: Docker network '$NETWORK_NAME' not found"
+    echo "Available networks:"
+    docker network ls --format "table {{.Name}}\t{{.Driver}}"
+    echo ""
+    echo "💡 Make sure your docker-compose services are running:"
+    echo "   cd $PROJECT_PATH && docker-compose -f $COMPOSE_FILE up -d"
+    exit 1
+fi
+
+# Get script directory for Claude setup
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+echo "🐳 Starting Claude Code with Docker Compose integration..."
+echo "📁 Project: $PROJECT_PATH"
+echo "📄 Compose file: $COMPOSE_FILE"
+echo "🌐 Network: $NETWORK_NAME"
+
+# Set environment variables for compose
+export PROJECT_PATH="$PROJECT_PATH"
+export CLAUDE_CONFIG_PATH="$HOME/.claude-configs/$(basename "$PROJECT_PATH")"
+export COMPOSE_PROJECT_NAME="$NETWORK_NAME"
+
+# Create config directory if needed
+mkdir -p "$CLAUDE_CONFIG_PATH"
+
+# Build Claude image if needed
+echo "🔨 Building Claude Code image..."
+cd "$SCRIPT_DIR"
+docker build -t claude-code .
+
+# Start Claude Code with compose
+cd "$PROJECT_PATH"
+echo "🚀 Starting Claude Code container..."
+
+# Use the Claude compose file but connect to existing network
+COMPOSE_PROJECT_NAME="$NETWORK_NAME" docker-compose \
+    -f "$SCRIPT_DIR/docker-compose.claude.yml" \
+    up -d
+
+echo "✅ Claude Code started successfully!"
+echo ""
+echo "🔗 Connected to network: $NETWORK_NAME"
+echo "💡 You can now access your services by container name:"
+echo "   - curl http://api:3000"
+echo "   - psql -h postgres -U user dbname"
+echo "   - redis-cli -h redis"
+echo ""
+echo "🎯 Attach to Claude Code:"
+echo "   docker exec -it claude-session claude --dangerously-skip-permissions"
+echo ""
+echo "📝 Setup GPG signing:"
+echo "   $SCRIPT_DIR/setup-gpg.sh"

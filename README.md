@@ -49,6 +49,32 @@ Keep project-specific Claude configurations separate from your git repo:
 
 The CLAUDE.md file will be automatically copied to your project workspace inside the container, giving Claude context without polluting your git repository.
 
+## GPG Commit Signing (Secure)
+
+For secure git commit signing, use the ephemeral key import approach:
+
+1. Start your container:
+   ```bash
+   claude-with-config
+   ```
+
+2. Import your signing key securely (from another terminal):
+   ```bash
+   claude-setup-gpg
+   # Or specify a specific key: claude-setup-gpg YOUR_KEY_ID
+   ```
+
+3. Now you can sign commits inside the container:
+   ```bash
+   git commit -m "Your commit message"  # Automatically signed
+   ```
+
+**Security Benefits:**
+- Only your signing key is imported, not your entire keyring
+- Key exists only in container memory, never on disk
+- Key is automatically removed when container stops
+- No persistent exposure of your GPG keys
+
 ## Architecture Explanation
 
 ### Why This Setup?
@@ -83,6 +109,7 @@ Then use these convenient commands:
 - `claude-with-config` - Run Claude with config for current directory name
 - `claude-init [name]` - Initialize CLAUDE.md config for project
 - `claude-run [path] [name]` - Run Claude with specific project and config
+- `claude-setup-gpg [key-id]` - Securely import GPG signing key into container
 
 ## Files
 
@@ -90,6 +117,7 @@ Then use these convenient commands:
 - `entrypoint.sh`: Handles file ownership and user switching
 - `run-claude.sh`: Wrapper script for easy usage
 - `claude-aliases.sh`: Shell aliases and helper functions
+- `setup-gpg.sh`: Secure GPG key import utility
 - `README.md`: This documentation
 
 ## Manual Usage
