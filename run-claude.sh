@@ -24,9 +24,10 @@ if [ -z "$ANTHROPIC_API_KEY" ]; then
     exit 1
 fi
 
-# Build the Docker image
+# Build the Docker image from the script's directory
 echo "Building Claude Code Docker image..."
-docker build -t claude-code .
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+docker build -t claude-code "$SCRIPT_DIR"
 
 # Prepare docker run command
 DOCKER_CMD="docker run -it --name claude-session --rm"

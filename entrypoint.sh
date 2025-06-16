@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Fix ownership of the workspace to match the claude user
-chown -R claude:claude /workspace
+# Fix ownership of the workspace to match the claude user (skip .git to avoid permission errors)
+find /workspace -not -path '/workspace/.git*' -exec chown claude:claude {} + 2>/dev/null || true
 
 # Copy CLAUDE.md from config mount if it exists
 if [ -f "/claude-config/CLAUDE.md" ]; then

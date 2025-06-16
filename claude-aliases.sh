@@ -4,11 +4,25 @@
 # source /path/to/ai-sandbox/claude-aliases.sh
 
 # Get the directory where this script is located
-CLAUDE_DOCKER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Use a more reliable method to find the script directory
+if [[ -n "${BASH_SOURCE[0]}" ]]; then
+    CLAUDE_DOCKER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+elif [[ -n "${(%):-%x}" ]]; then
+    # For zsh
+    CLAUDE_DOCKER_DIR="$(cd "$(dirname "${(%):-%x}")" && pwd)"
+else
+    # Fallback - assume it's in ~/ai-sandbox
+    CLAUDE_DOCKER_DIR="$HOME/ai-sandbox"
+fi
 
-# Basic aliases
-alias claude-here="$CLAUDE_DOCKER_DIR/run-claude.sh \$(pwd)"
-alias claude-with-config="$CLAUDE_DOCKER_DIR/run-claude.sh \$(pwd) ~/.claude-configs/\$(basename \$(pwd))"
+# Basic aliases - using functions instead of aliases for proper expansion
+claude-here() {
+    "$CLAUDE_DOCKER_DIR/run-claude.sh" "$(pwd)"
+}
+
+claude-with-config() {
+    "$CLAUDE_DOCKER_DIR/run-claude.sh" "$(pwd)" "$HOME/.claude-configs/$(basename "$(pwd)")"
+}
 
 # Function to initialize Claude config for current project
 claude-init() {
