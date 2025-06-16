@@ -112,10 +112,4 @@ claude-config-edit() {
     fi
 }
 
-echo "🤖 Claude Code Docker aliases loaded!"
-echo "Available commands:"
-echo "  claude-here              - Run Claude on current directory"
-echo "  claude-with-config       - Run Claude with config for current directory"
-echo "  claude-init [name]       - Initialize Claude config for project"
-echo "  claude-run [path] [name] - Run Claude with specific project/config"
-echo "  claude-config-edit [name]- Edit Claude config for project"
+# Quietly load aliases without spam

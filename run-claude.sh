@@ -34,6 +34,10 @@ DOCKER_CMD="docker run -it --name claude-session --rm"
 DOCKER_CMD="$DOCKER_CMD -v \"$PROJECT_PATH:/workspace\""
 DOCKER_CMD="$DOCKER_CMD -e ANTHROPIC_API_KEY=\"$ANTHROPIC_API_KEY\""
 
+# Mount persistent Claude config directory
+mkdir -p "$HOME/.claude-docker-config"
+DOCKER_CMD="$DOCKER_CMD -v \"$HOME/.claude-docker-config:/home/claude\""
+
 # Add CLAUDE.md config mount if provided
 if [ -n "$CLAUDE_CONFIG_PATH" ]; then
     if [ ! -d "$CLAUDE_CONFIG_PATH" ]; then
@@ -50,6 +54,5 @@ DOCKER_CMD="$DOCKER_CMD claude-code"
 # Run the container
 echo "Starting Claude Code container..."
 echo "Project mounted at: $PROJECT_PATH"
-echo "You can now attach to the container and run: claude --skip-check"
 
 eval $DOCKER_CMD
